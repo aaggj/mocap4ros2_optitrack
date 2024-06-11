@@ -24,7 +24,8 @@ import launch
 
 from launch import LaunchDescription
 from launch.actions import EmitEvent
-from launch.actions import SetEnvironmentVariable
+from launch.actions import SetEnvironmentVariable,DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import LifecycleNode
 from launch_ros.events.lifecycle import ChangeState
 
@@ -45,11 +46,11 @@ def generate_launch_description():
 
     driver_node = LifecycleNode(
         name='mocap4r2_optitrack_driver_node',
-        namespace='',
+        namespace=LaunchConfiguration('namespace'),
         package='mocap4r2_optitrack_driver',
         executable='mocap4r2_optitrack_driver_main',
         output='screen',
-        parameters=[params_file_path],
+        parameters=[LaunchConfiguration('config_file')],
     )
 
     # Make the driver node take the 'configure' transition
@@ -72,6 +73,8 @@ def generate_launch_description():
     ld = LaunchDescription()
 
     ld.add_action(stdout_linebuf_envvar)
+    ld.add_action(DeclareLaunchArgument('namespace', default_value=''))
+    ld.add_action(DeclareLaunchArgument('config_file', default_value=params_file_path))
     ld.add_action(driver_node)
     ld.add_action(driver_configure_trans_event)
     # ld.add_action(driver_activate_trans_event)
