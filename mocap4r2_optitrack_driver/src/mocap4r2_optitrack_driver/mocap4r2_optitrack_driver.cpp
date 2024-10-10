@@ -137,7 +137,7 @@ OptitrackDriverNode::process_frame(sFrameOfMocapData * data)
     mocap_interfaces::msg::MarkerArray msg;
     msg.header.stamp = now() - frame_delay;
     msg.header.frame_id = "map";
-    msg.frame_number = frame_number_;
+    msg.seq = frame_number_; //marker index?
 
     for (int i = 0; i < data->nLabeledMarkers; i++) {
       bool Unlabeled = ((data->LabeledMarkers[i].params & 0x10) != 0);
@@ -165,7 +165,7 @@ OptitrackDriverNode::process_frame(sFrameOfMocapData * data)
     mocap_interfaces::msg::RigidBodyArray msg_rb;
     msg_rb.header.stamp = now() - frame_delay;
     msg_rb.header.frame_id = "map";
-    msg_rb.frame_number = frame_number_;
+    msg_rb.seq = frame_number_;
 
     for (int i = 0; i < data->nRigidBodies; i++) {
       mocap_interfaces::msg::RigidBody rb;
@@ -180,7 +180,7 @@ OptitrackDriverNode::process_frame(sFrameOfMocapData * data)
       rb.pose.orientation.w = data->RigidBodies[i].qw;
       rb.markers = marker2rb[data->RigidBodies[i].ID];
 
-      msg_rb.rigidbodies.push_back(rb);
+      msg_rb.rigid_bodies.push_back(rb);
     }
 
     mocap4r2_rigid_body_pub_->publish(msg_rb);
@@ -200,7 +200,7 @@ OptitrackDriverNode::on_configure(const rclcpp_lifecycle::State & state)
 
   mocap4r2_markers_pub_ = create_publisher<mocap_interfaces::msg::MarkerArray>(
     "markers", rclcpp::QoS(1000));
-  mocap4r2_rigid_body_pub_ = create_publisher<mocap4r2_msgs::msg::RigidBodyArray>(
+  mocap4r2_rigid_body_pub_ = create_publisher<mocap_interfaces::msg::RigidBodyArray>(
     "rigid_bodies", rclcpp::QoS(1000));
 
   connect_optitrack();
